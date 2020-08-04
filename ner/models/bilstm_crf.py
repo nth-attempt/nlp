@@ -9,18 +9,22 @@ from ner.metrics import Metric
 
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from torchcrf import CRF
-
-import sys
-from ner.utils.gpu_profile import gpu_profile
+import gc
 
 
 class BiLSTMCRF(pl.LightningModule):
-    def __init__(self, input_dim=23626, embedding_dim=300, hidden_dim=128, output_dim=9):
+    def __init__(self, conf, *args, **kwargs):
         super().__init__()
-        self.output_dim = output_dim
-        self.rnn_encoder = RNNEncoder(input_dim, embedding_dim, hidden_dim)
-        self.fc = nn.Linear(2 * hidden_dim, output_dim)
-        self.crf = CRF(output_dim, batch_first=True)
+        self.hparams = conf
+        self.rnn_encoder = RNNEncoder(
+            self.hparams.model.input_dim,
+            self.hparams.model.embedding_dim,
+            self.hparams.model.hidden_dim,
+        )
+        self.fc = nn.Linear(
+            2 * self.hparams.model.hidden_dim, self.hparams.model.output_dim
+        )
+        self.crf = CRF(self.hparams.model.output_dim, batch_first=True)
         self.example_input_array = (
             torch.zeros(32, 40, dtype=torch.long),
             torch.ones(32, dtype=torch.long),
@@ -46,7 +50,14 @@ class BiLSTMCRF(pl.LightningModule):
         return {"loss": loss, "log": logs, "y": y, "y_pred": y_pred}
 
     def training_epoch_end(self, outputs):
-        gpu_profile(frame=sys._getframe(), event="line", arg=None)
+        for obj in gc.get_objects():
+            try:
+                if torch.is_tensor(obj) or (
+                    hasattr(obj, "data") and torch.is_tensor(obj.data)
+                ):
+                    print(type(obj), obj.size())
+            except:
+                pass
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
         # TODO: replace with pl metric class once automatic aggregation is ready
         y = []
@@ -92,4 +103,8 @@ class BiLSTMCRF(pl.LightningModule):
         return {"val_loss": avg_loss, "log": logs, "progress_bar": logs}
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.0005)
+        return torch.optim.Adam(
+            self.parameters(),
+            lr=self.hparams.train.adam.lr,
+            weight_decay=self.hparams.train.adam.weight_decay,
+        )

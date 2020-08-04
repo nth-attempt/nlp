@@ -1,0 +1,9 @@
+[PAD]
+I-ORG
+O
+I-MISC
+I-PER
+I-LOC
+B-LOC
+B-MISC
+B-ORG

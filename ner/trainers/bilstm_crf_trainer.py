@@ -12,6 +12,7 @@ from ner.utils.samplers import BucketBatchSampler, BatchSampler
 from torch.utils.data import DataLoader
 from pytorch_lightning.loggers import CometLogger
 from pytorch_lightning.callbacks import EarlyStopping
+from omegaconf import OmegaConf
 
 print(os.environ.get("COMET_API_KEY"))
 comet_logger = CometLogger(
@@ -33,9 +34,13 @@ ner_vocab_fpath = "store/ner_vocab.txt"
 
 def main():
 
+    conf = OmegaConf.load("conf/default.yaml")
+
     word_vocab, ner_vocab, char_vocab = create_vocab(
         train_fpath, word_vocab_fpath, ner_vocab_fpath, char_vocab_fpath
     )
+
+    model = BiLSTMCRF(conf)
 
     train_dataset = CoNLL2003Dataset(train_fpath, word_vocab, ner_vocab, char_vocab)
 
@@ -65,17 +70,17 @@ def main():
         data_source=train_dataset,
         bucket_boundaries=[5, 10, 15, 20, 25, 30, 40, 50, 140],
         seq_len_fn=CoNLL2003Dataset.seq_len_fn,
-        batch_size=32,
+        batch_size=model.hparams.train.batch_size,
         shuffle=True,
     )
 
-    val_sampler = BucketBatchSampler(
-        data_source=val_dataset,
-        bucket_boundaries=[5, 10, 15, 20, 25, 30, 40, 50, 140],
-        seq_len_fn=CoNLL2003Dataset.seq_len_fn,
-        batch_size=32,
-        shuffle=True,
-    )
+    # val_sampler = BucketBatchSampler(
+    #     data_source=val_dataset,
+    #     bucket_boundaries=[5, 10, 15, 20, 25, 30, 40, 50, 140],
+    #     seq_len_fn=CoNLL2003Dataset.seq_len_fn,
+    #     batch_size=32,
+    #     shuffle=True,
+    # )
 
     train_loader = DataLoader(
         train_dataset,
@@ -84,7 +89,9 @@ def main():
     )
 
     val_dataloader = DataLoader(
-        val_dataset, batch_size=32, collate_fn=CoNLL2003Dataset.collate_fn,
+        val_dataset,
+        batch_size=model.hparams.train.batch_size,
+        collate_fn=CoNLL2003Dataset.collate_fn,
     )
 
     # seq_lens = []
@@ -102,7 +109,6 @@ def main():
     #     print("-" * 50)
 
     # """
-    model = BiLSTMCRF()
 
     # pl.seed_everything(42)
 
@@ -128,11 +134,9 @@ def main():
     )
     trainer.fit(model, train_loader, val_dataloader)
 
-    trainer.test(test_dataloaders=val_dataloader)
+    # trainer.test(test_dataloaders=val_dataloader)
 
 
 # """
 if __name__ == "__main__":
-    sys.settrace(gpu_profile)
-
     main()

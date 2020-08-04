@@ -30,8 +30,9 @@ class RNNEncoder(nn.Module):
             input_size=embedding_dim,
             hidden_size=hidden_dim,
             num_layers=num_layers,
-            dropout=dropout,
             batch_first=self.batch_first,
+            dropout=dropout,
+            bidirectional=bidirectional,
         )
 
     def forward(self, x, x_lens):

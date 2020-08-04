@@ -69,16 +69,12 @@ class BucketBatchSampler(Sampler):
             # Flush the buckets
             for bidx, bucket in enumerate(self.buckets):
                 if len(bucket) == self.batch_size:
-                    yield sorted(
-                        bucket, key=lambda ix: -self.seq_len_fn(self.data_source[ix])
-                    )
+                    yield bucket
                     self.buckets[bidx] = []
         # Flush leftovers
         for bidx, bucket in enumerate(self.buckets):
             if len(bucket) > 0:
-                yield sorted(
-                    bucket, key=lambda ix: -self.seq_len_fn(self.data_source[ix])
-                )
+                yield bucket
 
     def __len__(self):
         return (len(self.data_source) + self.batch_size - 1) // self.batch_size

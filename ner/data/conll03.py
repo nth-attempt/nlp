@@ -44,10 +44,11 @@ class CoNLL2003Dataset(Dataset):
     def __len__(self):
         return len(self.sentences)
 
-    @staticmethod
-    def collate_fn(batch):
+    @classmethod
+    def collate_fn(cls, batch):
         max_char_len = 0
         sents, sent_lens, labels, char_seqs = [], [], [], []
+        batch = sorted(batch, key=lambda x: -cls.seq_len_fn(x))
         for sent, lbl, chr_seq in batch:
             sents.append(torch.tensor(sent, dtype=torch.long))
             sent_lens.append(len(sent))
@@ -65,8 +66,8 @@ class CoNLL2003Dataset(Dataset):
         # TODO: add char lengths
         return sents_t, sent_lens_t, labels_t, char_seqs_t
 
-    @staticmethod
-    def seq_len_fn(instance):
+    @classmethod
+    def seq_len_fn(cls, instance):
         return len(instance[0])
 
     def preprocess(self):

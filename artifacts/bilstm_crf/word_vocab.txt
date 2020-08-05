@@ -20,7 +20,6 @@ for
 The
 was
 2
--DOCSTART-
 0
 3
 at

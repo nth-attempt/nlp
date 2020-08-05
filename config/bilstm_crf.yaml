@@ -1,0 +1,18 @@
+train:
+  num_workers: 16
+  batch_size: 32
+  adam:
+    lr: 0.0005
+    weight_decay: 0 # 0.000001
+data:
+  train_file: "data/conll2003/train.txt"
+  val_file: "data/conll2003/val.txt"
+  test_file: "data/conll2003/test.txt"
+  word_vocab_file: "artifacts/bilstm_crf/word_vocab.txt"
+  char_vocab_file: "artifacts/bilstm_crf/char_vocab.txt"
+  ner_vocab_file: "artifacts/bilstm_crf/ner_vocab.txt"
+model:
+  embedding_dim: 300
+  hidden_dim: 128
+  output_dim: 9
+  input_dim: 23626

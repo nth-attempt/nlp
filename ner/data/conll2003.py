@@ -9,6 +9,7 @@ from torch.nn.utils.rnn import pad_sequence
 from ner.data.vocab import Vocab
 import os
 from collections import Counter
+from pathlib import Path
 
 
 class CoNLL2003Dataset(Dataset):
@@ -53,16 +54,22 @@ class CoNLL2003Dataset(Dataset):
             sents.append(torch.tensor(sent, dtype=torch.long))
             sent_lens.append(len(sent))
             labels.append(torch.tensor(lbl, dtype=torch.long))
-            max_char_len = max(max_char_len, max(len(chrs) for chrs in chr_seq))
+            max_char_len = max(
+                max_char_len, max(len(chrs) for chrs in chr_seq)
+            )
             char_seqs.append(chr_seq)
 
         sents_t = pad_sequence(sents, batch_first=True)
         labels_t = pad_sequence(labels, batch_first=True)
         sent_lens_t = torch.tensor(sent_lens, dtype=torch.long)
-        char_seqs_t = torch.zeros(sents_t.shape[0], sents_t.shape[1], max_char_len)
+        char_seqs_t = torch.zeros(
+            sents_t.shape[0], sents_t.shape[1], max_char_len
+        )
         for i, chr_seq in enumerate(char_seqs):
             for c, chars in enumerate(chr_seq):
-                char_seqs_t[i, c, : len(chars)] = torch.tensor(chars, dtype=torch.long)
+                char_seqs_t[i, c, : len(chars)] = torch.tensor(
+                    chars, dtype=torch.long
+                )
         # TODO: add char lengths
         return sents_t, sent_lens_t, labels_t, char_seqs_t
 
@@ -81,7 +88,9 @@ class CoNLL2003Dataset(Dataset):
                 if len(splits) > 1 and splits[0] != "-DOCSTART-":
                     words.append(self.word_vocab.get_id(splits[0]))
                     ner_tags.append(self.ner_vocab.get_id(splits[-1]))
-                    chars.append([self.char_vocab.get_id(ch) for ch in splits[0]])
+                    chars.append(
+                        [self.char_vocab.get_id(ch) for ch in splits[0]]
+                    )
             if words and ner_tags:
                 self.sentences.append(words)
                 self.labels.append(ner_tags)
@@ -124,6 +133,10 @@ def create_vocab(
 
         for word, _ in word_counter.most_common(max_vocab_size):
             word_vocab.add(word)
+
+        Path(word_vocab_fpath).parent.mkdir(parents=True, exist_ok=True)
+        Path(ner_vocab_fpath).parent.mkdir(parents=True, exist_ok=True)
+        Path(char_vocab_fpath).parent.mkdir(parents=True, exist_ok=True)
 
         # save
         word_vocab.save(word_vocab_fpath)

@@ -64,22 +64,30 @@ class Metric(object):
 
     def get_tp(self, class_name=None):
         if class_name is None:
-            return sum([self._tps[class_name] for class_name in self.get_classes()])
+            return sum(
+                [self._tps[class_name] for class_name in self.get_classes()]
+            )
         return self._tps[class_name]
 
     def get_tn(self, class_name=None):
         if class_name is None:
-            return sum([self._tns[class_name] for class_name in self.get_classes()])
+            return sum(
+                [self._tns[class_name] for class_name in self.get_classes()]
+            )
         return self._tns[class_name]
 
     def get_fp(self, class_name=None):
         if class_name is None:
-            return sum([self._fps[class_name] for class_name in self.get_classes()])
+            return sum(
+                [self._fps[class_name] for class_name in self.get_classes()]
+            )
         return self._fps[class_name]
 
     def get_fn(self, class_name=None):
         if class_name is None:
-            return sum([self._fns[class_name] for class_name in self.get_classes()])
+            return sum(
+                [self._fns[class_name] for class_name in self.get_classes()]
+            )
         return self._fns[class_name]
 
     def precision(self, class_name=None):
@@ -128,7 +136,9 @@ class Metric(object):
         return self.f_score(None)
 
     def macro_avg_f_score(self):
-        class_f_scores = [self.f_score(class_name) for class_name in self.get_classes()]
+        class_f_scores = [
+            self.f_score(class_name) for class_name in self.get_classes()
+        ]
         if len(class_f_scores) == 0:
             return 0.0
         macro_f_score = sum(class_f_scores) / len(class_f_scores)
@@ -138,7 +148,9 @@ class Metric(object):
         return self.accuracy(None)
 
     def macro_avg_accuracy(self):
-        class_accuracy = [self.accuracy(class_name) for class_name in self.get_classes()]
+        class_accuracy = [
+            self.accuracy(class_name) for class_name in self.get_classes()
+        ]
 
         if len(class_accuracy) > 0:
             return sum(class_accuracy) / len(class_accuracy)
@@ -151,13 +163,18 @@ class Metric(object):
 
     def to_tsv(self):
         return "{}\t{}\t{}\t{}".format(
-            self.precision(), self.recall(), self.accuracy(), self.micro_avg_f_score()
+            self.precision(),
+            self.recall(),
+            self.accuracy(),
+            self.micro_avg_f_score(),
         )
 
     @staticmethod
     def tsv_header(prefix=None):
         if prefix:
-            return "{0}_PRECISION\t{0}_RECALL\t{0}_ACCURACY\t{0}_F-SCORE".format(prefix)
+            return "{0}_PRECISION\t{0}_RECALL\t{0}_ACCURACY\t{0}_F-SCORE".format(
+                prefix
+            )
 
         return "PRECISION\tRECALL\tACCURACY\tF-SCORE"
 

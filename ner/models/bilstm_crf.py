@@ -51,7 +51,8 @@ class BiLSTMCRF(pl.LightningModule):
         loss = -self.crf(y_hat, y)
         y_pred = self.crf.decode(y_hat)
         y_pred = torch.tensor(y_pred, device=y_hat.device)
-        return loss, y.detach(), y_pred.detach()
+        # removed detach from here. should be taken care of by pl
+        return loss, y, y_pred
 
     def training_step(self, batch, batch_idx):
         loss, _, _ = self.step(batch)

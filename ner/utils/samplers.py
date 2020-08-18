@@ -71,10 +71,27 @@ class BucketBatchSampler(Sampler):
                 if len(bucket) == self.batch_size:
                     yield bucket
                     self.buckets[bidx] = []
-        # Flush leftovers
-        for bidx, bucket in enumerate(self.buckets):
-            if len(bucket) > 0:
-                yield bucket
+
+        # Flush leftovers in batch_sizes
+        batch = []
+        bidx = 0
+        while bidx < len(self.buckets):
+            bucket = self.buckets[bidx]
+            if len(batch) + len(bucket) <= self.batch_size:
+                batch.extend(bucket)
+                self.buckets[bidx] = []
+                bidx += 1
+            else:
+                diff = self.batch_size - len(batch)
+                batch.extend(bucket[:diff])
+                self.buckets[bidx] = self.buckets[bidx][diff:]
+
+            if len(batch) == self.batch_size:
+                yield batch
+                batch = []
+
+        if batch:
+            yield batch
 
     def __len__(self):
         return (len(self.data_source) + self.batch_size - 1) // self.batch_size

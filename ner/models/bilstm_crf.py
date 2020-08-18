@@ -74,9 +74,21 @@ class BiLSTMCRF(pl.LightningModule):
         y_pred = []
         for output in outputs:
             for instance in output["y"].tolist():
-                y.append([(tag, i) for i, tag in enumerate(instance)])
+                y.append(
+                    [
+                        (tag, i)
+                        for i, tag in enumerate(instance)
+                        if tag != 2 and tag != 0
+                    ]
+                )
             for instance in output["y_pred"].tolist():
-                y_pred.append([(tag, i) for i, tag in enumerate(instance)])
+                y_pred.append(
+                    [
+                        (tag, i)
+                        for i, tag in enumerate(instance)
+                        if tag != 2 and tag != 0
+                    ]
+                )
 
         metric = Metric("val_metric", y, y_pred)
         micro_f1 = metric.micro_avg_f_score()

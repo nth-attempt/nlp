@@ -218,7 +218,7 @@ class Metric(object):
                 if tag not in self._classes:
                     self._classes.add(tag)
 
-                if (tag, gold) in predicted_tags:
+                if (tag, gold) not in predicted_tags:
                     self.add_fn(tag)
                 else:
                     self.add_tn(tag)

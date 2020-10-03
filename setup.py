@@ -4,10 +4,10 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="ner",  # Replace with your own username
+    name="nlp",
     version="0.0.1",
     author="nth-attempt",
-    description="Pytorch NER models",
+    description="NLP using pytorch-lightning",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),

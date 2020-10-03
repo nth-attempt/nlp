@@ -1,4 +1,4 @@
-from ner.utils.samplers import BucketBatchSampler
+from nlp.utils.samplers import BucketBatchSampler
 from torch.utils.data import DataLoader, Dataset
 from torch.nn.utils.rnn import pad_sequence
 import torch

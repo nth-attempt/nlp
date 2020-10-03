@@ -8,11 +8,9 @@ data:
   train_file: "data/conll2003/train.txt"
   val_file: "data/conll2003/val.txt"
   test_file: "data/conll2003/test.txt"
-  word_vocab_file: "artifacts/bilstm_crf/word_vocab.txt"
-  char_vocab_file: "artifacts/bilstm_crf/char_vocab.txt"
-  ner_vocab_file: "artifacts/bilstm_crf/ner_vocab.txt"
+  word_vocab_file: "artifacts/bilstm_crf/conll2003_word_vocab.txt"
+  char_vocab_file: "artifacts/bilstm_crf/conll2003_char_vocab.txt"
+  label_vocab_file: "artifacts/bilstm_crf/conll2003_label_vocab.txt"
 model:
   embedding_dim: 300
   hidden_dim: 128
-  output_dim: 9
-  input_dim: 23626

@@ -1,46 +1,12 @@
 from collections import defaultdict
 
-# import torch
-# from pytorch_lightning.metrics.functional import stat_scores_multiple_classes
-
-
-# def prf_from_pl_outputs(outputs, num_classes, device):
-#     tps = torch.zeros((num_classes,), device=device)
-#     fps = torch.zeros((num_classes,), device=device)
-#     tns = torch.zeros((num_classes,), device=device)
-#     fns = torch.zeros((num_classes,), device=device)
-#     sups = torch.zeros((num_classes,), device=device)
-#     for x in outputs:
-#         _tps, _fps, _tns, _fns, _sups = stat_scores_multiple_classes(
-#             x["y_pred"], x["y"], num_classes=num_classes
-#         )
-#         for c in range(num_classes):
-#             tps[c] += _tps[c]
-#             fps[c] += _fps[c]
-#             fns[c] += _fns[c]
-#             tns[c] += _tns[c]
-#             sups[c] += _sups[c]
-#     tps = tps.to(torch.float)
-#     fps = fps.to(torch.float)
-#     fns = fns.to(torch.float)
-
-#     precision = tps / (tps + fps)
-#     recall = tps / (tps + fns)
-#     f1 = 2 * precision * recall / (precision + recall)
-#     precision[precision != precision] = 0
-#     recall[recall != recall] = 0
-#     f1[f1 != f1] = 0
-
-#     return precision, recall, f1, support
-
 
 class Metric(object):
     # https://github.com/flairNLP/flair/blob/master/flair/training_utils.py
-    def __init__(self, name, y_true, y_pred, beta=1):
+    def __init__(self, name, beta=1):
         self.name = name
         self.beta = beta
         self.initialize()
-        self.score(y_true, y_pred)
 
     def initialize(self):
         self._tps = defaultdict(int)
@@ -201,24 +167,26 @@ class Metric(object):
         ]
         return "\n".join(all_lines)
 
-    def score(self, y_true, y_pred):
+    def score(self, y_true, y_pred, ignore_classes=[]):
         self.initialize()
 
         for gold_tags, predicted_tags in zip(y_true, y_pred):
             for tag, prediction in predicted_tags:
-                if tag not in self._classes:
-                    self._classes.add(tag)
+                if tag not in ignore_classes:
+                    if tag not in self._classes:
+                        self._classes.add(tag)
 
-                if (tag, prediction) in gold_tags:
-                    self.add_tp(tag)
-                else:
-                    self.add_fp(tag)
+                    if (tag, prediction) in gold_tags:
+                        self.add_tp(tag)
+                    else:
+                        self.add_fp(tag)
 
             for tag, gold in gold_tags:
-                if tag not in self._classes:
-                    self._classes.add(tag)
+                if tag not in ignore_classes:
+                    if tag not in self._classes:
+                        self._classes.add(tag)
 
-                if (tag, gold) not in predicted_tags:
-                    self.add_fn(tag)
-                else:
-                    self.add_tn(tag)
+                    if (tag, gold) not in predicted_tags:
+                        self.add_fn(tag)
+                    else:
+                        self.add_tn(tag)

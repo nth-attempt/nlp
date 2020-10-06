@@ -1,32 +1,27 @@
 import pytorch_lightning as pl
 import torch
 from nlp.metrics import Metric
-from nlp.utils.constants import PAD_TOKEN, O_TOKEN
+from nlp.constants import PAD_TOKEN, O_TOKEN
 from nlp.data.vocab import Vocab
 
 
-class TokenClassificationTask(pl.LightningModule):
-    def __init__(self, model: torch.nn.Module, label_vocab: Vocab):
+class SequenceLabelingBase(pl.LightningModule):
+    def __init__(self, hparams, *args, **kwargs):
         super().__init__()
-        self.model = model
-        self.label_vocab = label_vocab
-        self.save_hyperparameters(self.model.hparams)
-        # self.example_input_array = (
-        #     torch.zeros(32, 40, dtype=torch.long),
-        #     torch.ones(32, dtype=torch.long),
-        # )
+        self.save_hyperparameters(hparams)
+        self.label_vocab = kwargs.get("label_vocab")
 
     def training_step(self, batch, batch_idx):
         x, x_lens, y, _ = batch
-        loss = self.model.loss(x, x_lens, y)
+        loss = self.loss(x, x_lens, y)
         result = pl.TrainResult(minimize=loss)
         result.log("train_loss", loss, on_epoch=True, on_step=True)
         return result
 
     def validation_step(self, batch, batch_idx):
         x, x_lens, y, _ = batch
-        loss = self.model.loss(x, x_lens, y)
-        y_pred = self.model.decode(x, x_lens)
+        loss = self.loss(x, x_lens, y)
+        y_pred = self.decode(x, x_lens)
         return {"val_loss": loss, "y": y, "y_pred": y_pred}
 
     def validation_epoch_end(self, outputs):
@@ -62,8 +57,8 @@ class TokenClassificationTask(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(
             self.parameters(),
-            lr=self.model.hparams.train.adam.lr,
-            weight_decay=self.model.hparams.train.adam.weight_decay,
+            lr=self.hparams.train.adam.lr,
+            weight_decay=self.hparams.train.adam.weight_decay,
         )
 
     def _score(self, y_true, y_pred):
@@ -77,3 +72,7 @@ class TokenClassificationTask(pl.LightningModule):
             ],
         )
         return metric.micro_avg_f_score()
+
+    @staticmethod
+    def add_model_specific_args(parser, root_dir):
+        pass

@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-from nlp.utils.constants import UNK, UNK_TOKEN, PAD_TOKEN
+from nlp.constants import UNK, UNK_TOKEN, PAD_TOKEN
 
 
 class Vocab:

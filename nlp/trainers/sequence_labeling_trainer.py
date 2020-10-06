@@ -1,8 +1,7 @@
 import pytorch_lightning as pl
 from nlp.data.conll2003 import CoNLL2003Dataset
-from nlp.models.bilstm_crf import BiLSTMCRF
-from nlp.tasks import TokenClassificationTask
-from nlp.utils.samplers import BucketBatchSampler
+from nlp.models.sequence_labeling import BiRecurrentCRF
+from nlp.samplers import BucketBatchSampler
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 
@@ -18,8 +17,7 @@ from torch.utils.data import DataLoader
 def main():
     pl.seed_everything(42)
 
-    conf = OmegaConf.load("config/token_classification_ontonotes.yaml")
-    conf = OmegaConf.load("config/token_classification_conll2003.yaml")
+    conf = OmegaConf.load("config/sequence_labeling_conll2003.yaml")
 
     train_dataset = CoNLL2003Dataset(
         conf.data.train_file,
@@ -72,11 +70,10 @@ def main():
         char_vocab_len,
     ) = train_dataset.get_vocab_lens()
 
-    conf.model.input_dim = word_vocab_len
-    conf.model.output_dim = label_vocab_len
+    conf.model.num_words = word_vocab_len
+    conf.model.num_labels = label_vocab_len
 
-    model = BiLSTMCRF(conf)
-    task = TokenClassificationTask(model, train_dataset.label_vocab)
+    model = BiRecurrentCRF(conf, label_vocab=train_dataset.label_vocab)
 
     trainer = pl.Trainer(
         gpus=1,
@@ -94,7 +91,7 @@ def main():
         # auto_scale_batch_size=True,
         num_sanity_val_steps=0,
     )
-    trainer.fit(task, train_loader, val_dataloader)
+    trainer.fit(model, train_loader, val_dataloader)
 
     trainer.test(test_dataloaders=test_dataloader)
 

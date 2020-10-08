@@ -17,7 +17,7 @@ from torch.utils.data import DataLoader
 def main():
     pl.seed_everything(42)
 
-    conf = OmegaConf.load("config/sequence_labeling_conll2003.yaml")
+    conf = OmegaConf.load("config/bilstm_crf.yaml")
 
     train_dataset = CoNLL2003Dataset(
         conf.data.train_file,

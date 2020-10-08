@@ -13,7 +13,8 @@
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

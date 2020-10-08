@@ -1,7 +1,7 @@
 PAD_TOKEN = "[PAD]"
 UNK_TOKEN = "[UNK]"
 BOS_TOKEN = "[BOS]"
-EOS_TOKEN = "[EOS}"
+EOS_TOKEN = "[EOS]"
 O_TOKEN = "O"
 
 PAD = 0

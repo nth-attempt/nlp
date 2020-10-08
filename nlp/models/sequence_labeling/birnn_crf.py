@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 from nlp.modules.seq2seq_encoders import RNNSeq2SeqEncoder
-from nlp.models.sequence_labeling import SequenceLabelingBase
+from nlp.models.sequence_labeling import SequenceLabelingCRFBase
 from nlp.constants import PAD
 from torchcrf import CRF
 
 
-class BiRecurrentCRF(SequenceLabelingBase):
+class BiRecurrentCRF(SequenceLabelingCRFBase):
     def __init__(self, hparams, *args, **kwargs):
         super().__init__(hparams, *args, **kwargs)
         self.word_embedding = nn.Embedding(
@@ -41,13 +41,13 @@ class BiRecurrentCRF(SequenceLabelingBase):
         return emissions
 
     def loss(self, x, x_lens, y):
+        mask = torch.ne(x, PAD)
         y_hat = self(x, x_lens)
-        # TODO: add mask for crf based on lengths
-        loss = -self.crf(y_hat, y)
+        loss = -self.crf(y_hat, y, mask=mask)
         return loss
 
     def decode(self, x, x_lens):
+        mask = torch.ne(x, PAD)
         y_hat = self(x, x_lens)
-        y_pred = self.crf.decode(y_hat)
-        y_pred = torch.tensor(y_pred, device=y_hat.device)
+        y_pred = self.crf.decode(y_hat, mask)
         return y_pred

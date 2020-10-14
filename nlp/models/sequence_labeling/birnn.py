@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 from nlp.modules.seq2seq_encoders import RNNSeq2SeqEncoder
-from nlp.models.sequence_labeling import SequenceLabelingCRFBase
+from nlp.models.sequence_labeling import SequenceLabelingBase
 from nlp.constants import PAD
 from torchcrf import CRF
 
 
-class BiRecurrentCRF(SequenceLabelingCRFBase):
+class BiRNN(SequenceLabelingBase):
     def __init__(self, hparams, *args, **kwargs):
         super().__init__(hparams, *args, **kwargs)
         self.word_embedding = nn.Embedding(

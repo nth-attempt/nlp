@@ -1,9 +1,10 @@
 import pytorch_lightning as pl
 from nlp.data.conll2003 import CoNLL2003Dataset
-from nlp.models.sequence_labeling import BiRecurrentCRF
+from nlp.models.sequence_labeling import BiRNN
 from nlp.samplers import BucketBatchSampler
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 # from pytorch_lightning.loggers import CometLogger
 # # print(os.environ.get("COMET_API_KEY"))
@@ -73,23 +74,18 @@ def main():
     conf.model.num_words = word_vocab_len
     conf.model.num_labels = label_vocab_len
 
-    model = BiRecurrentCRF(conf, label_vocab=train_dataset.label_vocab)
+    model = BiRNN(conf, label_vocab=train_dataset.label_vocab)
 
     trainer = pl.Trainer(
+        callbacks=[EarlyStopping(monitor="val_loss")],
         gpus=1,
         # precision=16,
         # logger=comet_logger,
-        # fast_dev_run=True,  # default is false
-        # deterministic=True,  # default is True. For reproducibility
-        # auto_lr_find=True,  # default is false. needs lr defined in hparams
-        check_val_every_n_epoch=1,  # default is 1
-        early_stop_callback=True,  # default is None. If true, uses default callback or we pass early_stop,
-        # track_grad_norm=2,
+        fast_dev_run=False,  # default is false
         # overfit_batches=0.01,
         weights_summary="full",
         # log_gpu_memory="all"
         # auto_scale_batch_size=True,
-        num_sanity_val_steps=0,
     )
     trainer.fit(model, train_loader, val_dataloader)
 

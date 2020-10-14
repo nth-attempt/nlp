@@ -6,13 +6,18 @@ from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
-# from pytorch_lightning.loggers import CometLogger
+from pytorch_lightning.loggers import CometLogger, TensorBoardLogger
+
 # # print(os.environ.get("COMET_API_KEY"))
-# comet_logger = CometLogger(
+# logger = CometLogger(
 #     api_key=os.environ.get("COMET_API_KEY"),
 #     workspace=os.environ.get("COMET_WORKSPACE"),
 #     project_name="nlp",
 # )
+
+logger = TensorBoardLogger(
+    "logs", name="sequence_labeling", default_hp_metric=False
+)
 
 
 def main():
@@ -80,7 +85,7 @@ def main():
         callbacks=[EarlyStopping(monitor="val_loss")],
         gpus=1,
         # precision=16,
-        # logger=comet_logger,
+        logger=logger,
         fast_dev_run=False,  # default is false
         # overfit_batches=0.01,
         weights_summary="full",

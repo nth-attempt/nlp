@@ -20,17 +20,19 @@ class SequenceLabelingBase(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         loss, y, y_pred = self._prediction_step(batch, batch_idx)
-        self.log("val_loss", loss, on_epoch=True, prog_bar=True, logger=True)
+        self.log("val_loss", loss, prog_bar=True, logger=True)
         return {"y": y, "y_pred": y_pred}
 
     def validation_epoch_end(self, validation_step_outputs):
         y, y_pred = self._prediction_epoch_end(validation_step_outputs)
         micro_f1 = self._score(y, y_pred)
         self.log("val_micro_f1", micro_f1)
+        # select the hparams to tune
+        self.logger.log_hyperparams(self.hparams, {"micro_f1": micro_f1})
 
     def test_step(self, batch, batch_idx):
         loss, y, y_pred = self._prediction_step(batch, batch_idx)
-        self.log("test_loss", loss, on_epoch=True, logger=True)
+        self.log("test_loss", loss, logger=True)
         return {"y": y, "y_pred": y_pred}
 
     def test_epoch_end(self, test_step_outputs):

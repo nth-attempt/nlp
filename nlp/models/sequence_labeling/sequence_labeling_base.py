@@ -27,7 +27,7 @@ class SequenceLabelingBase(pl.LightningModule):
         y, y_pred = self._prediction_epoch_end(validation_step_outputs)
         micro_f1 = self._score(y, y_pred)
         self.log("val_micro_f1", micro_f1)
-        # select the hparams to tune
+        # save the hparams to tune
         self.logger.log_hyperparams(self.hparams, {"micro_f1": micro_f1})
 
     def test_step(self, batch, batch_idx):

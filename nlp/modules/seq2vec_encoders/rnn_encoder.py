@@ -32,21 +32,17 @@ class RNNSeq2VecEncoder(nn.Module):
         inputs: (batch_size, seq_len, input_size)
         input_lens: (batch_size)
         """
-        total_length = inputs.size(1)
         if not input_lengths:
-            input_lengths = torch.full(
-                (inputs.size(0),),
-                total_length,
-                dtype=torch.long,
-                device=inputs.device,
+            outputs, _ = self.rnn(inputs)
+        else:
+            total_length = inputs.size(1)
+            packed_inputs = pack_padded_sequence(
+                inputs, input_lengths, batch_first=True
             )
-        packed_inputs = pack_padded_sequence(
-            inputs, input_lengths, batch_first=True
-        )
-        packed_outputs, _ = self.rnn(packed_inputs)
-        outputs, _ = pad_packed_sequence(
-            packed_outputs, batch_first=True, total_length=total_length,
-        )
+            packed_outputs, _ = self.rnn(packed_inputs)
+            outputs, _ = pad_packed_sequence(
+                packed_outputs, batch_first=True, total_length=total_length,
+            )
         # outputs: (batch_size, seq_len, hidden_size)
         return outputs[:, -1, :]
 

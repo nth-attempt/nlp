@@ -13,14 +13,12 @@ class SequenceLabelingBase(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, x_lens, y, chars = batch
         loss = self.loss(x, x_lens, y, chars)
-        self.log(
-            "train_loss", loss, on_epoch=True, logger=True,
-        )
+        self.log("train_loss", loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, y, y_pred = self._prediction_step(batch, batch_idx)
-        self.log("val_loss", loss, prog_bar=True, logger=True)
+        self.log("val_loss", loss, prog_bar=True)
         return {"y": y, "y_pred": y_pred}
 
     def validation_epoch_end(self, validation_step_outputs):
@@ -32,7 +30,7 @@ class SequenceLabelingBase(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         loss, y, y_pred = self._prediction_step(batch, batch_idx)
-        self.log("test_loss", loss, logger=True)
+        self.log("test_loss", loss)
         return {"y": y, "y_pred": y_pred}
 
     def test_epoch_end(self, test_step_outputs):

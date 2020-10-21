@@ -25,7 +25,7 @@ class RNNSeq2VecEncoder(nn.Module):
             bidirectional=bidirectional,
         )
 
-    def forward(self, inputs, input_lengths):
+    def forward(self, inputs, input_lengths=None):
         """
         https://pytorch.org/docs/stable/notes/faq.html#pack-rnn-unpack-with-data-parallelism
         
@@ -33,6 +33,13 @@ class RNNSeq2VecEncoder(nn.Module):
         input_lens: (batch_size)
         """
         total_length = inputs.size(1)
+        if not input_lengths:
+            input_lengths = torch.full(
+                (inputs.size(0),),
+                total_length,
+                dtype=torch.long,
+                device=inputs.device,
+            )
         packed_inputs = pack_padded_sequence(
             inputs, input_lengths, batch_first=True
         )

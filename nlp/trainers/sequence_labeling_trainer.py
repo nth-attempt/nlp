@@ -77,6 +77,7 @@ def main():
     ) = train_dataset.get_vocab_lens()
 
     conf.model.num_words = word_vocab_len
+    conf.model.num_chars = char_vocab_len
     conf.model.num_labels = label_vocab_len
 
     model = BiRNN(conf, label_vocab=train_dataset.label_vocab)

@@ -11,8 +11,8 @@ class SequenceLabelingBase(pl.LightningModule):
         self.label_vocab = kwargs.get("label_vocab")
 
     def training_step(self, batch, batch_idx):
-        x, x_lens, y, _ = batch
-        loss = self.loss(x, x_lens, y)
+        x, x_lens, y, chars = batch
+        loss = self.loss(x, x_lens, y, chars)
         self.log(
             "train_loss", loss, on_epoch=True, logger=True,
         )
@@ -26,7 +26,7 @@ class SequenceLabelingBase(pl.LightningModule):
     def validation_epoch_end(self, validation_step_outputs):
         y, y_pred = self._prediction_epoch_end(validation_step_outputs)
         micro_f1 = self._score(y, y_pred)
-        self.log("val_micro_f1", micro_f1)
+        self.log("val_micro_f1", micro_f1, prog_bar=True)
         # save the hparams to tune
         self.logger.log_hyperparams(self.hparams, {"micro_f1": micro_f1})
 
@@ -48,9 +48,9 @@ class SequenceLabelingBase(pl.LightningModule):
         )
 
     def _prediction_step(self, batch, batch_idx):
-        x, x_lens, y, _ = batch
-        loss = self.loss(x, x_lens, y)
-        y_pred = self.decode(x, x_lens)
+        x, x_lens, y, chars = batch
+        loss = self.loss(x, x_lens, y, chars)
+        y_pred = self.decode(x, x_lens, chars)
         # y_pred is a List[List]
         y_pred = torch.nn.utils.rnn.pad_sequence(
             [torch.tensor(i, device=self.device) for i in y_pred],

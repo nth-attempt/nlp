@@ -13,7 +13,16 @@ data:
   label_vocab_file: "artifacts/bilstm_crf/conll2003_label_vocab.txt"
 model:
   word_embedding_dim: 300
-  hidden_size: 128
-  rnn_type: "LSTM"
-  num_layers: 1
-  dropout: 0.0
+  word_rnn:
+    rnn_type: "LSTM"
+    hidden_size: 128
+    num_layers: 1
+    dropout: 0.0
+  use_char: True
+  char_embedding_dim: 30 # put 0 if use_char = False
+  char_encoder_type: "RNN" # RNN or CNN
+  char_rnn:
+    rnn_type: "LSTM"
+    hidden_size: 128
+    num_layers: 1
+    dropout: 0.0

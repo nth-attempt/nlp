@@ -74,7 +74,7 @@ class CoNLL2003Dataset(Dataset):
         labels_t = pad_sequence(labels, batch_first=True)
         sent_lens_t = torch.tensor(sent_lens, dtype=torch.long)
         char_seqs_t = torch.zeros(
-            sents_t.shape[0], sents_t.shape[1], max_char_len
+            sents_t.shape[0], sents_t.shape[1], max_char_len, dtype=torch.long
         )
         for i, chr_seq in enumerate(char_seqs):
             for c, chars in enumerate(chr_seq):

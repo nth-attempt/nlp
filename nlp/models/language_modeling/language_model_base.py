@@ -16,7 +16,7 @@ class LanguageModelBase(pl.LightningModule):
     ):
         
         super().__init__()
-        self.save_hyperparameters(hpramas)
+        self.save_hyperparameters(hparams)
         self.teacher_forcing_rate = self.hparams.model.teacher_forcing_rate
         self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=PAD)
         
@@ -65,12 +65,7 @@ class LanguageModelBase(pl.LightningModule):
         toss = torch.rand(1)
         loss, y, y_pred = self.step(batch, toss)
         perplexity = torch.exp(loss)
-        self.log(
-            "train_loss", 
-            loss, 
-            on_epoch=True, 
-            logger=True,
-        )
+        self.log("train_loss", loss, on_step=True, on_epoch=True, logger=True)
         return {
             "loss": loss,
             "perplexity": perplexity,
@@ -84,12 +79,7 @@ class LanguageModelBase(pl.LightningModule):
         toss = 1.0 # validation always decoding
         loss, y, y_pred = self.step(batch, toss)
         perplexity = torch.exp(loss)
-        self.log(
-            "train_loss", 
-            loss, 
-            prog_bar=True, 
-            logger=True,
-        )
+        self.log("val_loss", loss, prog_bar=True, logger=True)
         return {
             "y": y,
             "y_pred": y_pred,
@@ -103,6 +93,7 @@ class LanguageModelBase(pl.LightningModule):
     ):
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
         avg_perplexity = torch.stack([x["perplexity"] for x in outputs]).mean()
+        self.log("train_loss", avg_loss, prog_bar=True)
         
     def validation_epoch_end(
         self,

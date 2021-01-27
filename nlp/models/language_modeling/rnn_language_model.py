@@ -25,7 +25,7 @@ class RNNLanguageModel(LanguageModelBase):
         
         cell_type = f"{self.hparams.model.encoder.rnn_type}Cell"
         self.encoder = getattr(nn, cell_type)(
-            self.hparams.model.encoder.embedding_size,
+            self.hparams.model.embedding.embedding_size,
             self.hparams.model.encoder.hidden_size,
         )
         
@@ -46,25 +46,23 @@ class RNNLanguageModel(LanguageModelBase):
         hidden_state = torch.zeros((batch_size, self.hidden_size), device=x.device)
         cell_state = torch.zeros((batch_size, self.hidden_size), device=x.device)
         teacher_forcing = toss<self.teacher_forcing_rate
-        
         emissions = []
         if teacher_forcing:
             x_emb = self.embedding(x)
             for i in range(max_seq_len):
                 hidden_state, cell_state = self.encoder(x_emb[:,i,:], (hidden_state, cell_state))
                 logits = self.fc(hidden_state)
-                emissions.append(hidden_state)
+                emissions.append(logits)
         else:
             inputs = x[:,0]
             for i in range(max_seq_len):
                 x_emb = self.embedding(inputs)
-                hidden_state, cell_state = self.encoder(x_emb[:,i,:], (hidden_state, cell_state))
+                hidden_state, cell_state = self.encoder(x_emb, (hidden_state, cell_state))
                 logits = self.fc(hidden_state)
-                emissions.append(torch.unsqueeze(logits, 0))
+                emissions.append(logits)
                 inputs = torch.argmax(logits, dim=1).detach()
                 
         emissions = torch.cat(emissions, dim=0)
-        
         return emissions
     
     def save_embedding(self):

@@ -1,0 +1,24 @@
+train:
+  num_workers: 2
+  batch_size: 3
+  adam:
+    lr: 0.001
+    weight_decay: 0
+data:
+  vocab_fpath: "artifacts/rnn_language_model/vocab.yaml"
+  max_sequence_length: 8
+  max_vocab_size: 26
+  use_bos: false
+  bucket_boundaries: [8, 16]
+model:
+  teacher_forcing_rate: 0.6
+  embedding:
+    save_numpy_filepath: "artifacts/rnn_language_model/embedding.npy"
+    save_torch_filepath: "artifacts/rnn_language_model/embedding.ckpt"
+    embedding_size: 20
+    freeze_weights: false
+  encoder:
+    save_filepath: "artifacts/rnn_language_model/encoder.ckpt"
+    hidden_size: 20
+    rnn_type: "LSTM"
+    freeze_weights: false

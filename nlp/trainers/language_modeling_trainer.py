@@ -84,7 +84,7 @@ def main():
     )
     
     trainer = pl.Trainer(
-        max_epochs=20,
+        max_epochs=10,
         logger=logger,
         callbacks=[early_stopping],
         gpus=0,
@@ -96,8 +96,8 @@ def main():
     
     
 def create_dummy_data():
-    num_train, num_val = 11, 5
-    tokens = ["a", "b", "c", "d", "e", "x", "y", "z"]
+    num_train, num_val = 3, 1
+    tokens = ["a", "b", "c", "d", "a", "b", "c", "d"]
     train_tokens = [tokens]*num_train
     val_tokens = [tokens]*num_val
     return train_tokens, val_tokens

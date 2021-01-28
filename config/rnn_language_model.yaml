@@ -11,15 +11,15 @@ data:
   use_bos: false
   bucket_boundaries: [8, 16]
 model:
-  teacher_forcing_rate: 0.9
+  teacher_forcing_rate: 1.0
   embedding:
     save_numpy_filepath: "artifacts/rnn_language_model/embedding.npy"
     save_torch_filepath: "artifacts/rnn_language_model/embedding.ckpt"
-    embedding_size: 30
+    embedding_size: 10
     freeze_weights: false
   encoder:
     save_filepath: "artifacts/rnn_language_model/encoder.ckpt"
-    hidden_size: 100
+    hidden_size: 10
     rnn_type: "LSTM"
     freeze_weights: false
     num_layers: 1

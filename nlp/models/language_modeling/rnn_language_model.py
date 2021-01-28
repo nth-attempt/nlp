@@ -36,6 +36,12 @@ class RNNLanguageModel(LanguageModelBase):
         )
         self.hidden_size = self.hparams.model.encoder.hidden_size
         
+        self.__init_weights()
+        
+    def __init_weights(self):
+        for param in self.encoder.parameters():
+            param.requires_grad = True
+        
     def forward(
         self,
         x,
@@ -53,17 +59,16 @@ class RNNLanguageModel(LanguageModelBase):
             for i in range(max_seq_len):
                 hidden_state, cell_state = self.encoder(x_emb[:,i,:], (hidden_state, cell_state))
                 logits = self.fc(hidden_state)
-                emissions.append(logits)
+                emissions.append(torch.unsqueeze(logits, 1))
         else:
             inputs = x[:,0]
             for i in range(max_seq_len):
                 x_emb = self.embedding(inputs)
                 hidden_state, cell_state = self.encoder(x_emb, (hidden_state, cell_state))
                 logits = self.fc(hidden_state)
-                emissions.append(logits)
+                emissions.append(torch.unsqueeze(logits, 1))
                 inputs = torch.argmax(logits, dim=1).detach()
-                
-        emissions = torch.cat(emissions, dim=0)
+        emissions = torch.cat(emissions, dim=1)
         return emissions
     
     def save_embedding(self):
@@ -140,5 +145,5 @@ class RNNLanguageModel(LanguageModelBase):
             del y_pred
             del lens
         return emissions
-'''           
+'''         
                 

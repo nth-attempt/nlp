@@ -53,14 +53,14 @@ def main():
         train_dataset,
         batch_sampler=train_sampler,
         collate_fn=LanguageModelDataset.collate_fn,
-        num_workers=2,
+        num_workers=32,
     )
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=conf.train.batch_size,
         collate_fn=LanguageModelDataset.collate_fn,
         shuffle=False,
-        num_workers=2,
+        num_workers=32,
     )
     
     conf.data.input_vocab_size = train_dataset.get_vocab_len()
@@ -84,7 +84,7 @@ def main():
     )
     
     trainer = pl.Trainer(
-        max_epochs=64,
+        max_epochs=20,
         logger=logger,
         callbacks=[early_stopping],
         gpus=0,

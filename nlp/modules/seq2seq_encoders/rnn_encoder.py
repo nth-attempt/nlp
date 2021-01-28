@@ -60,17 +60,15 @@ class RNNSeq2SeqEncoder(nn.Module):
         c0=None,
     ):
         total_length = inputs.size(self.length_dim)
+        batch_size = inputs.shape[int(not self.batch_first)]
         if h0==None:
-            if self.batch_first:
-                h0 = torch.zeros((inputs.shape[0], (1+int(self.bidirectional))*self.num_layers, self.hidden_size), device=inputs.device)
-                c0 = torch.zeros((inputs.shape[0], (1+int(self.bidirectional))*self.num_layers, self.hidden_size), device=inputs.device)
-            else:
-                h0 = torch.zeros(((1+int(self.bidirectional))*self.num_layers, inputs.shape[1], self.hidden_size), device=inputs.device)
-                c0 = torch.zeros(((1+int(self.bidirectional))*self.num_layers, inputs.shape[1], self.hidden_size), device=inputs.device)
+            h0 = torch.zeros(((1+int(self.bidirectional))*self.num_layers, batch_size, self.hidden_size), device=inputs.device)
+            c0 = torch.zeros(((1+int(self.bidirectional))*self.num_layers, batch_size, self.hidden_size), device=inputs.device)
+            
                        
         packed_inputs = pack_padded_sequence(inputs, input_lengths, batch_first=self.batch_first)
         packed_outputs, hiddens = self.rnn(packed_inputs, (h0, c0))
-        outputs, _ = pad_packed_sequence(packed_outputs, batch_first=self.batch_firstm total_length=total_length)
+        outputs, _ = pad_packed_sequence(packed_outputs, batch_first=self.batch_first, total_length=total_length)
         
         return outputs, hiddens
     

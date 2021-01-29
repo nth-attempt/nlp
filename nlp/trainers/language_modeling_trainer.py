@@ -84,7 +84,7 @@ def main():
     )
     
     trainer = pl.Trainer(
-        max_epochs=10,
+        max_epochs=20,
         logger=logger,
         callbacks=[early_stopping],
         gpus=0,

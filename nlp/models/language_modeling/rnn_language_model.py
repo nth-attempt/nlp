@@ -75,7 +75,7 @@ class RNNLanguageModel(LanguageModelBase):
         if self.hparams.model.embedding.save_numpy_filepath:
             self.embedding.save_numpy(self.hparams.model.embedding.save_numpy_filepath)
         if self.hparams.model.embedding.save_torch_filepath:
-            self.embedding.save_numpy(self.hparams.model.embedding.save_torch_filepath)
+            self.embedding.save_torch(self.hparams.model.embedding.save_torch_filepath)
             
     def save_encoder(self):
         if self.hparams.model.encoder.save_filepath:

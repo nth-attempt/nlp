@@ -102,5 +102,27 @@ def create_dummy_data():
     val_tokens = [tokens]*num_val
     return train_tokens, val_tokens
 
+def save_and_load_encoder():
+    from nlp.modules.seq2seq_encoders import RNNSeq2SeqEncoder
+    from nlp.modules.embedding import Embedding
+    # save best model encoder and embedding
+    lm = RNNLanguageModel.load_from_checkpoint(best_model_path)
+    lm.save_embedding() # saves in conf.model.embedding.save_torch_filepath
+    lm.save_encoder() # saves in conf.model.encoder.save_filepath
+    
+    emb = Embedding(vocab_size, conf.model.embedding.embedding_size, filepath=conf.model.embedding.save_torch_filepath)
+    emb.eval()
+    enc = RNNSeq2SeqEncoder(conf.model.embedding.embedding_size, conf.model.encoder.hidden_size, bidirectional=False)
+    enc.load_torch(conf.model.encoder.save_filepath)
+    enc.eval()
+    
+    input_l = [[1,2,3,4], [5,6,7,8]]
+    x = torch.tensor(input_l)
+    lens = torch.tensor([len(item) for item in input_l])
+    # use hidden for sentence representations
+    x_emb = emb(x)
+    enc_emissions, hiddens = enc(x_emb, lens)
+    
+
 if __name__=="__main__":
     main()

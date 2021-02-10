@@ -17,6 +17,7 @@ class RNNAutoencoder(AutoencoderBase):
         super().__init__(hparams, *args, **kwargs)
         self.hparams = hparams
         self.batch_first = True
+        self.use_bos = self.hparams.data.use_bos
         
         self.embedding = Embedding(
             self.hparams.data.input_vocab_size,
@@ -52,6 +53,9 @@ class RNNAutoencoder(AutoencoderBase):
         
         batch_size = enc_x.shape[0]
         max_seq_len = enc_x.shape[1]
+        if self.use_bos:
+            max_seq_len += 1
+        
         encoder_hidden_size = self.hparams.model.encoder.hidden_size
         encoder_num_layers = self.hparams.model.encoder.num_layers
         teacher_forcing = toss<self.teacher_forcing_rate

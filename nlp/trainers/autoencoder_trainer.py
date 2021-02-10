@@ -94,10 +94,10 @@ def main():
     print(checkpoint_callback.best_model_path)
     
 def create_dummy_data():
-    num_train, num_val = 5, 1
+    num_train, num_val = 2, 2
     tokens = ["a", "b", "c", "d", "e", "f", "g", "h"]
-    train_tokens = [tokens]*num_train
-    val_tokens = [tokens]*num_val
+    train_tokens = [tokens]*num_train+[tokens[:4]]*num_train+[tokens[:3]]*num_train
+    val_tokens = [tokens]*num_val+[tokens[:4]]*num_val
     return train_tokens, val_tokens
 
 if __name__=="__main__":

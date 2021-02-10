@@ -9,7 +9,7 @@ data:
   max_sequence_length: 8
   max_vocab_size: 26
   use_bos: false
-  bucket_boundaries: [8, 16]
+  bucket_boundaries: [2, 4, 8]
 model:
   teacher_forcing_rate: 1.0
   embedding:

@@ -3,14 +3,49 @@ import torch.nn as nn
 
 
 class CNNSeq2VecEncoder(nn.Module):
-    """Some Information about CNNSeq2VecEncoder"""
+    """CNNSeq2VecEncoder
+    !!! Not accurate as masks need to be taken into account. see https://github.com/allenai/allennlp/blob/main/allennlp/modules/seq2vec_encoders/cnn_encoder.py
+    """
 
-    def __init__(self):
+    def __init__(
+        self,
+        input_dim,
+        num_filters_list,
+        filter_size_list,
+        activation_fn,
+        stride=1, 
+        padding=0, 
+        dilation=1, 
+        groups=1, 
+        bias=True, 
+        padding_mode='zeros',
+    ):
         super(CNNSeq2VecEncoder, self).__init__()
+        
+        self.input_dim = input_dim
+        self.num_filters_list = num_filters_list
+        self.filter_size_list = filter_size_list
+        self.activation_fn = activation_fn
+        self.output_dim = sum(self.num_filters_list)
+        
+        self.conv_layers = [nn.Conv1d(self.input_dim, num_filters, filter_size, stride, padding, dilation, groups, bias, padding_mode) for num_filters,filter_size in zip(self.num_filters_list, self.filter_size_list)]
 
     def forward(self, x):
-
-        return x
+        """
+        x : batchsize, seq_len, input_dim. 
+        When using on chars instead of words, x : batchsize*seq_len, tok_len, input_dim
+        """
+        
+        x = torch.transpose(x, 1, 2) # x : batchsize, input_dim, seq_len, so in_channels = input_dim
+        output = []
+        for conv_layer in self.conv_layers:
+            op = conv_layer(x) # op : batchsize, num_filters, new_seq_len (calculated using padding, stride, seq_len...)
+            if self.activation_fn:
+                op = self.activation_fn(op)
+            op = op.max(dim=2)[0] # op : batch_size, num_filters -- take the max along the dim=2 (along the seq)
+            output.append(op)
+        output = torch.cat(output, dim=1) # output : sum([num_filters_list])
+        return output
 
 
 class CharCNNEncoder(nn.Module):
